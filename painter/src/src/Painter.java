@@ -10,6 +10,7 @@ import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -61,7 +62,12 @@ public class Painter extends Frame implements ActionListener, MouseListener,
     FileDialog dialog;
     
     int imageWidth,
-        imageHeight;
+        imageHeight,
+        offsetX,
+        offsetY, 
+        dots;
+    
+    Point [] dot;
     
     Point start,
           end;
@@ -77,7 +83,10 @@ public class Painter extends Frame implements ActionListener, MouseListener,
             texture = false,
             transparent = false,
             shadow = false,
-            thick = false;
+            thick = false,
+            mouseUp = false,
+            adjusted = false,
+            dragging = false;
     
     public Painter()
     {
@@ -306,12 +315,21 @@ public class Painter extends Frame implements ActionListener, MouseListener,
 
     @Override
     public void mousePressed(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        mouseUp = false;
+        start = new Point(e.getX(), e.getY());
+        adjusted = true;
+        repaint();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(rounded || line || ellipse || rectangle || draw || text){
+            end = new Point(e.getX(), e.getY());
+            mouseUp = true;
+            dragging = false;
+            adjusted = false;
+            repaint();
+        }
     }
 
     @Override
@@ -326,7 +344,21 @@ public class Painter extends Frame implements ActionListener, MouseListener,
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        dragging = true;
+        
+        if(new Rectangle(offsetX, offsetY,
+            imageWidth, imageHeight).contains(e.getX(), e.getY())){
+            if(draw){
+                dot[dots] = new Point(e.getX(), e.getY());
+                dots++;
+            }
+        }
+        
+        if(new Rectangle(offsetX, offsetY,
+            imageWidth, imageHeight).contains(start.x, start.y)){
+            end = new Point(e.getX(), e.getY());
+            repaint();
+        }
     }
 
     @Override
