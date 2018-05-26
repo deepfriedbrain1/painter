@@ -1,14 +1,20 @@
 
 package src;
 
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.CheckboxMenuItem;
+import java.awt.Color;
+import java.awt.Composite;
 import java.awt.FileDialog;
 import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -20,6 +26,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -87,6 +95,11 @@ public class Painter extends Frame implements ActionListener, MouseListener,
             mouseUp = false,
             adjusted = false,
             dragging = false;
+    
+    Composite composite;
+    
+    Color color;
+    Paint paint;
     
     public Painter()
     {
@@ -225,9 +238,107 @@ public class Painter extends Frame implements ActionListener, MouseListener,
         roundedMenuItem.setState(false);
         freehandMenuItem.setState(false);
         textMenuItem.setState(false);
+          
+    }//end setFlagsFalse
+    
+    @Override
+    public void paint(Graphics g){
+        Graphics2D g2d;
         
+        if(!dragging && !adjusted){
+            if(image == null){
+                image = createImage(imageWidth, imageHeight);
+            }
+            g2d = (Graphics2D)image.getGraphics();
+            
+        }else{
+            g2d = (Graphics2D) g;
+            g.drawImage(image, offsetX, offsetY, this);
+            g.drawRect(offsetX, offsetY, imageWidth, imageHeight);
+            g2d.clip(new Rectangle2D.Double(offsetX, offsetY,
+                imageWidth, imageHeight));
+        }
+        composite = g2d.getComposite();
         
-    }
+        if(color != null){
+            g2d.setColor(color);
+        }else{
+            g2d.setColor(new Color(0, 0, 0));
+        }
+        
+        if(thick){
+            g2d.setStroke(new BasicStroke(10));
+        }else{
+            g2d.setStroke(new BasicStroke(1));
+        }
+        
+        if(mouseUp || dragging){
+            Point tempStart, tempEnd;
+            
+            tempStart = new Point(Math.min(end.x, start.x),
+                Math.min(end.y, start.y));
+            
+            tempEnd = new Point(Math.max(end.x, start.x),
+                Math.max(end.y, start.y));
+            
+            tempStart = new Point(Math.max(tempStart.x, offsetX),
+                Math.max(tempStart.y, offsetY));
+            
+            tempEnd = new Point(Math.max(tempEnd.x, offsetX),
+                Math.max(tempEnd.y, offsetY));
+
+            tempStart = new Point(Math.min(tempStart.x,
+                bufferedImage.getWidth() + offsetX),
+                Math.min(tempStart.y, bufferedImage.getHeight() +
+                offsetY));
+
+            tempEnd = new Point(Math.min(tempEnd.x,
+                bufferedImage.getWidth() + offsetX),
+                Math.min(tempEnd.y, bufferedImage.getHeight() +
+                offsetY));
+
+            if(!adjusted){
+                tempEnd.x -= offsetX;
+                tempEnd.y -= offsetY;
+                tempStart.x -= offsetX;
+                tempStart.y -= offsetY;
+                end.x -= offsetX;
+                end.y -= offsetY;
+                start.x -= offsetX;
+                start.y -= offsetY;
+                adjusted=true;
+            }
+            
+            int width = tempEnd.x - tempStart.x;
+            int height = tempEnd.y - tempStart.y;
+            
+            if(line){
+                Line2D.Double drawLine = new Line2D.Double(
+                    start.x, start.y, end.x, end.y);
+                
+                if(shadow){
+                    paint = g2d.getPaint();
+                    composite = g2d.getComposite();
+                    
+                    g2d.setPaint(Color.black);
+                    g2d.setComposite(
+                            AlphaComposite.getInstance(
+                                    AlphaComposite.SRC_OVER, 0.3f));
+                    Line2D.Double line2 = new Line2D.Double(start.x + 9, start.y + 9,
+                        end.x + 9, end.y + 9);
+                    
+                    g2d.draw(line2);
+                    
+                    g2d.setPaint(paint);
+                    g2d.setComposite(composite);
+                }
+                g2d.draw(drawLine);
+            }
+            
+            
+        }
+        
+    }//end paint
     
     @Override
     public void actionPerformed(ActionEvent e) {
