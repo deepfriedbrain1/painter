@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Composite;
 import java.awt.FileDialog;
 import java.awt.Frame;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -26,6 +27,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -335,6 +337,66 @@ public class Painter extends Frame implements ActionListener, MouseListener,
                 g2d.draw(drawLine);
             }
             
+            if(ellipse && width != 0 && height != 0){
+                Ellipse2D.Double ellipse = new Ellipse2D.Double(
+                    tempStart.x, tempStart.y, width, height);
+                
+                if(shadow){
+                    paint = g2d.getPaint();
+                    composite = g2d.getComposite();
+                    
+                    g2d.setPaint(Color.black);
+                    g2d.setComposite(AlphaComposite.getInstance(
+                        AlphaComposite.SRC_OVER, 0.3f));
+                    
+                    Ellipse2D.Double ellipse2 = new Ellipse2D.Double(
+                        tempStart.x + 9, tempStart.y + 9 , width, height);
+                    
+                    if(solid || shade || transparent || texture){
+                        g2d.fill(ellipse2);
+                    }else{
+                        g2d.draw(ellipse2);
+                    }
+                    
+                    g2d.setPaint(paint);
+                    g2d.setComposite(composite);
+                }
+                
+                if(solid){
+                    g2d.setPaint(color);
+                }
+                
+                if(shade){
+                    g2d.setPaint(new GradientPaint(
+                        tempStart.x, tempStart.y, color,
+                        tempEnd.x, tempEnd.y, Color.black));
+                }
+                
+                if(texture){
+                    Rectangle2D.Double anchor = new Rectangle2D.Double(
+                        0, 0, titeImage.getWidth(), tileImage.getHeight());
+                    
+                    TexturePaint texturePaint = new TexturePaint(
+                        tileImage, anchor);
+                    
+                    g2d.setPaint(texturePaint);
+                }
+                
+                if(transparent){
+                    g2d.setComposite(AlphaComposite.getInstance(
+                        AlphaComposite.SRC_OVER, 0.1f));
+                }
+                
+                if(solid || shade || transparent || texture){
+                    g2d.fill(ellipse);
+                }else{
+                    g2d.draw(ellipse);
+                }
+                
+                if(transparent){
+                    g2d.setComposite(composite);
+                }
+            }
             
         }
         
