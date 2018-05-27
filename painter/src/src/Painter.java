@@ -31,9 +31,11 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javax.swing.JColorChooser;
 
 /**
  *
@@ -70,7 +72,8 @@ public class Painter extends Frame implements ActionListener, MouseListener,
                      shadowMenuItem;
     
     FileDialog dialog;
-    
+    OkCancelDialog textDialog;
+    String drawText;
     int imageWidth,
         imageHeight,
         offsetX,
@@ -314,6 +317,7 @@ public class Painter extends Frame implements ActionListener, MouseListener,
             int width = tempEnd.x - tempStart.x;
             int height = tempEnd.y - tempStart.y;
             
+            // Draw a Line
             if(line){
                 Line2D.Double drawLine = new Line2D.Double(
                     start.x, start.y, end.x, end.y);
@@ -335,8 +339,9 @@ public class Painter extends Frame implements ActionListener, MouseListener,
                     g2d.setComposite(composite);
                 }
                 g2d.draw(drawLine);
-            }
+            }// end Drawing a Line
             
+            // Drawing Ellipses
             if(ellipse && width != 0 && height != 0){
                 Ellipse2D.Double ellipse = new Ellipse2D.Double(
                     tempStart.x, tempStart.y, width, height);
@@ -396,10 +401,48 @@ public class Painter extends Frame implements ActionListener, MouseListener,
                 if(transparent){
                     g2d.setComposite(composite);
                 }
-            }
+            }//end Drawing Ellipses
+            
+            // Drawing Rectangles
+            if(rectangle && width != 0 && height != 0){
+                Rectangle2D.Double rectangle = new Rectangle2D.Double(
+                    tempStart.x, tempStart.y, width, height);
+                
+                if(shadow){
+                    paint = g2d.getPaint();
+                    composite = g2d.getComposite();
+                    
+                    g2d.setPaint(Color.black);
+                    g2d.setComposite(AlphaComposite.getInstance(
+                        AlphaComposite.SRC_OVER, 0.3f));
+                }
+                
+                if(texture){
+                    Rectangle2D.Double anchor = new Rectangle2D.Double(
+                    0, 0, tileImage.getWidth(), tileImage.getHeight());
+                    TexturePaint texturePaint = new TexturePaint(tileImage, anchor);
+                    
+                    g2d.setPaint(texturePaint);
+                }
+                
+                if(solid || shade || texture || transparent){
+                    g2d.fill(rectangle);
+                }else{
+                    g2d.draw(rectangle);
+                }
+                
+                if(transparent){
+                    g2d.setComposite(composite);
+                }
+            }//end Drawing Rectangles
             
         }
         
+        if(!dragging){
+            g2d.drawImage(image, offsetX, offsetY, this);
+        }
+        g.setColor(Color.black);
+        g.drawRect(offsetX, offsetY, imageWidth, imageHeight);
     }//end paint
     
     @Override
@@ -478,6 +521,16 @@ public class Painter extends Frame implements ActionListener, MouseListener,
             repaint();
             
         }//end if - new menu item
+        
+        // Select Color
+        if(e.getSource() == colorMenuItem){
+            color = JColorChooser.showDialog(this, "Select your color",
+                    Color.black);
+            start.x = -20;
+            start.y = -20;
+            end.x = -20;
+            end.y = -20;
+        }//end if - select color
         
     }//end actionPerformed   
 
