@@ -18,6 +18,7 @@ import java.awt.MenuItem;
 import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.TexturePaint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -31,7 +32,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -44,9 +44,9 @@ import javax.swing.JColorChooser;
 public class Painter extends Frame implements ActionListener, MouseListener,
         MouseMotionListener, ItemListener
 {
-    BufferedImage bufferedImage;
-    Image image,
-          tileImage;
+    BufferedImage bufferedImage, tileImage;
+    Image image;
+          
     MenuBar menuBar;
     Menu menu1, 
          menu2,
@@ -198,6 +198,8 @@ public class Painter extends Frame implements ActionListener, MouseListener,
         setMenuBar(menuBar);
         
         dialog = new FileDialog(this, "File Dialog");
+        imageWidth = 400;
+        imageHeight = 400;
         bufferedImage = new BufferedImage(imageWidth, imageHeight,
             BufferedImage.TYPE_INT_BGR);
         
@@ -214,7 +216,7 @@ public class Painter extends Frame implements ActionListener, MouseListener,
         }
         catch(java.io.IOException ioe){
             System.out.println("Need tile.jpg.");
-            System.exit(0);
+            //System.exit(0);
         }
         
         this.addWindowListener(
@@ -379,7 +381,7 @@ public class Painter extends Frame implements ActionListener, MouseListener,
                 
                 if(texture){
                     Rectangle2D.Double anchor = new Rectangle2D.Double(
-                        0, 0, titeImage.getWidth(), tileImage.getHeight());
+                        0, 0, tileImage.getWidth(), tileImage.getHeight());
                     
                     TexturePaint texturePaint = new TexturePaint(
                         tileImage, anchor);
