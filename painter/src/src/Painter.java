@@ -1,6 +1,7 @@
 
 package src;
 
+// Showing all imports for learning and revisiting purposes
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.CheckboxMenuItem;
@@ -131,7 +132,7 @@ public class Painter extends Frame implements ActionListener, MouseListener,
         menu1.add(saveMenuItem);
         saveMenuItem.addActionListener(this);
         
-        colorMenuItem = new MenuItem("Selct color...");
+        colorMenuItem = new MenuItem("Select color...");
         menu3.add(colorMenuItem);
         colorMenuItem.addActionListener(this);
         
@@ -143,7 +144,7 @@ public class Painter extends Frame implements ActionListener, MouseListener,
         menu2.add(linesMenuItem);
         linesMenuItem.addItemListener(this);
         
-        ellipsesMenuItem = new CheckboxMenuItem("");
+        ellipsesMenuItem = new CheckboxMenuItem("Draw ellipses");
         menu2.add(ellipsesMenuItem);
         ellipsesMenuItem.addItemListener(this);
         
@@ -214,9 +215,9 @@ public class Painter extends Frame implements ActionListener, MouseListener,
             File inputFile = new File("tile.jpg");
             tileImage = ImageIO.read(inputFile);
         }
-        catch(java.io.IOException ioe){
+        catch(IOException ioe){
             System.out.println("Need tile.jpg.");
-            //System.exit(0);
+            System.exit(0);
         }
         
         this.addWindowListener(
